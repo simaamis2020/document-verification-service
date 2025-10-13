@@ -1,0 +1,75 @@
+spring:
+ application:
+    name: document-service
+ cloud:
+    function:
+      definition: loanSubmit;aiConnect
+    stream:
+      defaultBinder: solace-binder
+
+      bindings:
+      
+           loanSubmit-in-0:
+             binder: solace-binder
+             destination: loans/originationservices/application/submitted/> 
+             
+             content-type: application/json
+             consumer:
+                 queueName: scst/wk/AnnaQueue/plain/AnnaQueue
+
+          
+
+            
+           documentVerify-out-0:
+              binder: solace-binder
+              destination: loans/originationservices/documents/verified/>
+
+           documentFailed-out-0:
+              binder: solace-binder
+              destination: loans/originationservices/documents/failed/>
+
+           aiConnect-out-0:
+             destination: loan-project/solace-agent-mesh/v1/llm-service/request/general-good/>      # connector's input topic
+             binder: solace-binder
+             contentType: application/json
+
+           aiConnect-in-0:
+             destination: loan-project/solace-agent-mesh/v1/llm-service/response/>      # connector's output topic
+                           
+             binder: solace-binder
+             contentType: application/json
+             consumer:
+                queueName: loan-project/solace-agent-mesh/v1/llm-service/response/>
+      binders:
+        solace-binder:
+          type: solace
+          environment:
+            solace:
+              java:
+                host: 'tcps://mr-connection-1zlyvzw422t.messaging.solace.cloud:55443'
+                msgVpn: annasamplebrokerservice
+                clientUsername: solace-cloud-client
+                clientPassword: ekcr4bljrku5pusroecsmqmcub
+
+ai:
+ prompts:
+  validate: >
+      You are verifying financial documents (such as pay stubs or bank statements) submitted for a loan application.
+      Extract the data in human readable format and then evaluate. Review the content and check for completeness and consistency. respond with pass or fail and notes for anything missing
+
+logging:
+  level:
+    root: info
+    org:
+      springframework: info
+server:
+  port: 8083
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+app:
+ uploads:
+  base-dir: "${BASE_DIR}"
+
