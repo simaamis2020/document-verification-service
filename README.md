@@ -12,3 +12,19 @@ A Java Spring Boot service for document intake and LLM-based decision parsing.
 - Parses LLM response
 - Publishes document-fail and document-verified events to solace event mesh.
 
+## How to run
+- Update Configuration
+
+  Open src/main/resources/application.yml.
+
+Change Solace connection variables (host, msgVpn, clientUsername, clientPassword) to match your environment.
+Change file upload directory to match yours
+
+ - Build the Project
+
+   mvn clean install -DskipTests
+
+
+ - Run the Application
+
+   mvn spring-boot:run
